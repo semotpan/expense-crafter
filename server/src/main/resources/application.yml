@@ -1,5 +1,11 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
 spring:
-  datasource: # Database props
+  # Database props
+  datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:bb_db}
     username: ${DB_USER:application}
     password: ${DB_PASSWORD:An0thrS3crt}
@@ -13,3 +19,13 @@ spring:
           batch_versioned_data: true
         order_inserts: true
         order_updates: true
+  # Web props
+  autoconfigure: # disable default exception handling, enforce @RestControllerAdvice invocation
+    exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  mvc:
+    throw-exception-if-no-handler-found: true
+  jackson:
+    default-property-inclusion: non_empty
+  web:
+    resources:
+      add-mappings: false
