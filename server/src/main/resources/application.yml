@@ -1,1 +1,15 @@
-
+spring:
+  datasource: # Database props
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:bb_db}
+    username: ${DB_USER:application}
+    password: ${DB_PASSWORD:An0thrS3crt}
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: ${DB_DIALECT:org.hibernate.dialect.MySQLDialect}
+        jdbc:
+          batch_size: 25
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
