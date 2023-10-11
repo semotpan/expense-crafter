@@ -7,4 +7,4 @@ services:
       - 'MYSQL_PASSWORD=secret'
       - 'MYSQL_ROOT_PASSWORD=verysecret'
     ports:
-      - '3306'
+      - '3306:3306'

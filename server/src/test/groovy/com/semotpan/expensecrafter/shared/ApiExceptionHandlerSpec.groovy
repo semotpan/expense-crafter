@@ -30,7 +30,7 @@ class ApiExceptionHandlerSpec extends Specification {
     @Autowired
     MockMvc mockMvc
 
-    def "Should get Bad Request when message not readable exception"() {
+    def "should get Bad Request when message not readable exception"() {
         var lenientResp = JsonOutput.toJson([
                 status   : 400,
                 errorCode: "BAD_REQUEST",
@@ -48,7 +48,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Bad Request when type mismatch exception"() {
+    def "should get Bad Request when type mismatch exception"() {
         var lenientResp = JsonOutput.toJson([
                 status   : 400,
                 errorCode: "BAD_REQUEST",
@@ -66,7 +66,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Not Found when no handler found exception"() {
+    def "should get Not Found when no handler found exception"() {
         var lenientResp = JsonOutput.toJson([
                 status      : 404,
                 errorCode   : "NOT_FOUND",
@@ -82,7 +82,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Method Not Allowed when request method not supported exception"() {
+    def "should get Method Not Allowed when request method not supported exception"() {
         var lenientResp = JsonOutput.toJson([
                 status      : 405,
                 errorCode   : "METHOD_NOT_ALLOWED",
@@ -99,7 +99,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Not Acceptable when media type not acceptable exception"() {
+    def "should get Not Acceptable when media type not acceptable exception"() {
         var lenientResp = JsonOutput.toJson([
                 status      : 406,
                 errorCode   : "NOT_ACCEPTABLE",
@@ -116,7 +116,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Unsupported media type when media type not supported exception"() {
+    def "should get Unsupported media type when media type not supported exception"() {
         var lenientResp = JsonOutput.toJson([
                 status      : 415,
                 errorCode   : "UNSUPPORTED_MEDIA_TYPE",
@@ -133,7 +133,7 @@ class ApiExceptionHandlerSpec extends Specification {
                 .andExpect(jsonPath('$.timestamp').value(matchesPattern(ISO_8601)))
     }
 
-    def "Should get Internal Server Error when unexpected exception thrown"() {
+    def "should get Internal Server Error when unexpected exception thrown"() {
         var lenientResp = JsonOutput.toJson([
                 status      : 500,
                 errorCode   : "INTERNAL_SERVER_ERROR",
