@@ -16,10 +16,10 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Getter
-@EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "accounts")
-@NoArgsConstructor(access = PRIVATE)
+@EqualsAndHashCode(callSuper = false)
+@Table(name = "account")
+@NoArgsConstructor(access = PRIVATE, force = true)
 public final class Account extends AbstractAggregateRoot<Account> {
 
     static final String patternRFC5322 = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
