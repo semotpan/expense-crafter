@@ -1,5 +1,8 @@
-package com.semotpan.expensecrafter.shared;
+package com.semotpan.expensecrafter;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,8 +10,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
 @Configuration
-@EnableConfigurationProperties(CorsProperties.class)
+@EnableConfigurationProperties(WebConfig.CorsProperties.class)
 class WebConfig {
 
     @Bean
@@ -27,5 +34,19 @@ class WebConfig {
                 registry.addMapping("/**").combine(config);
             }
         };
+    }
+
+    @Setter
+    @Getter
+    @ConfigurationProperties(prefix = "web.cors")
+    static final class CorsProperties {
+
+        private List<String> allowedOrigins = new ArrayList<>();
+        private List<String> allowedMethods = new ArrayList<>();
+        private List<String> allowedHeaders = new ArrayList<>();
+        private List<String> exposedHeaders = new ArrayList<>();
+        private Boolean allowCredentials;
+        private Duration maxAge = Duration.ofSeconds(1800);
+
     }
 }

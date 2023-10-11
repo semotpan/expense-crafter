@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS accounts
+CREATE TABLE IF NOT EXISTS account
 (
     id            BINARY(16) PRIMARY KEY,
     creation_date TIMESTAMP    NOT NULL DEFAULT NOW(),
