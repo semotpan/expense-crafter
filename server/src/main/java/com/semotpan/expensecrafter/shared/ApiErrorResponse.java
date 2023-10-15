@@ -1,7 +1,6 @@
 package com.semotpan.expensecrafter.shared;
 
 import lombok.Builder;
-import lombok.Generated;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import java.util.Collection;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-@Generated
 public record ApiErrorResponse(Instant timestamp,
                                Integer status,
                                HttpStatus errorCode,
@@ -127,4 +125,6 @@ public record ApiErrorResponse(Instant timestamp,
                         .debugMessage(debugMessage)
                         .build());
     }
+
+    public record ApiErrorField(String field, String message, Object rejectedValue) {}
 }

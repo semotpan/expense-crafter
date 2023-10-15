@@ -1,9 +1,12 @@
 package com.semotpan.expensecrafter.account;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -15,10 +18,11 @@ import static java.util.regex.Pattern.compile;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Getter
 @Entity
-@EqualsAndHashCode(callSuper = false)
 @Table(name = "account")
+@Getter
+@ToString
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor(access = PRIVATE, force = true)
 public final class Account extends AbstractAggregateRoot<Account> {
 
@@ -45,6 +49,13 @@ public final class Account extends AbstractAggregateRoot<Account> {
         }
 
         registerEvent(new AccountCreated(this.id));
+    }
+
+    @JsonCreator
+    public static Account of(@JsonProperty("firstName") String firstName,
+                             @JsonProperty("lastName") String lastName,
+                             @JsonProperty("emailAddress") String emailAddress) {
+        return new Account(firstName, lastName, new EmailAddress(emailAddress));
     }
 
     @Embeddable
