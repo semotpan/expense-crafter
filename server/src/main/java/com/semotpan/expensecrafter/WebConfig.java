@@ -1,5 +1,6 @@
 package com.semotpan.expensecrafter;
 
+import com.semotpan.expensecrafter.shared.ApiFailureHandler;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,6 +18,11 @@ import java.util.List;
 @Configuration
 @EnableConfigurationProperties(WebConfig.CorsProperties.class)
 class WebConfig {
+
+    @Bean
+    ApiFailureHandler apiFailureHandler() {
+        return new ApiFailureHandler();
+    }
 
     @Bean
     WebMvcConfigurer corsConfigurer(CorsProperties properties) {

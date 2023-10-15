@@ -18,6 +18,10 @@
         <spock-bom.version>2.4-M1-groovy-4.0</spock-bom.version>
         <jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
         <springdoc-openapi-starter-webmvc-ui.version>2.2.0</springdoc-openapi-starter-webmvc-ui.version>
+        <moneta.version>1.4.2</moneta.version>
+        <jackson-datatype-money>1.3.0</jackson-datatype-money>
+        <vavr.version>0.10.4</vavr.version>
+        <hypersistence-utils.version>3.6.0</hypersistence-utils.version>
     </properties>
     <dependencies>
         <!-- Web -->
@@ -45,6 +49,23 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-62</artifactId>
+            <version>${hypersistence-utils.version}</version>
+        </dependency>
+
+        <!-- Misc -->
+        <dependency>
+            <groupId>org.javamoney.moneta</groupId>
+            <artifactId>moneta-core</artifactId>
+            <version>${moneta.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>${vavr.version}</version>
         </dependency>
 
         <!-- Infrastructure -->
@@ -168,6 +189,12 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-groovy</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.zalando</groupId>
+            <artifactId>jackson-datatype-money</artifactId>
+            <version>${jackson-datatype-money}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

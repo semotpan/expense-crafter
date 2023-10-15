@@ -15,11 +15,11 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Getter
 @Entity
-@EqualsAndHashCode
-@ToString
 @Table(name = "expense_category")
+@Getter
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor(access = PRIVATE, force = true)
 public final class Category {
 

@@ -1,0 +1,27 @@
+{
+  "status": 422,
+  "errorCode": "UNPROCESSABLE_ENTITY",
+  "message": "Failures on expense create request",
+  "errors": [
+    {
+      "field": "accountId",
+      "message": "AccountId cannot be null"
+    },
+    {
+      "field": "categoryId",
+      "message": "CategoryId cannot be null"
+    },
+    {
+      "field": "paymentType",
+      "message": "PaymentType must be 'Cash' or 'Card'"
+    },
+    {
+      "field": "amount",
+      "message": "Amount cannot be null"
+    },
+    {
+      "field": "expenseDate",
+      "message": "ExpenseDate cannot be null"
+    }
+  ]
+}

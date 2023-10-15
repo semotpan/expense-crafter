@@ -20,7 +20,7 @@ import static com.semotpan.expensecrafter.shared.ApiErrorResponse.*;
 
 @Slf4j
 @RestControllerAdvice
-final class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+public final class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
