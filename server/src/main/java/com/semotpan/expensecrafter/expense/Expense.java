@@ -4,10 +4,7 @@ import com.semotpan.expensecrafter.account.Account.AccountIdentifier;
 import com.semotpan.expensecrafter.shared.PaymentType;
 import io.hypersistence.utils.hibernate.type.money.MonetaryAmountType;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CompositeType;
 import org.javamoney.moneta.Money;
 import org.springframework.data.domain.AbstractAggregateRoot;
@@ -53,7 +50,7 @@ public class Expense extends AbstractAggregateRoot<Expense> {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
-    @lombok.Builder
+    @Builder
     public Expense(AccountIdentifier account,
                    MonetaryAmount amount,
                    PaymentType paymentType,
@@ -69,6 +66,14 @@ public class Expense extends AbstractAggregateRoot<Expense> {
         this.paymentType = paymentType == null ? PaymentType.CARD : paymentType;
         this.expenseDate = expenseDate == null ? LocalDate.now() : expenseDate;
         this.description = description;
+
+        registerEvent(ExpenseCreated.builder()
+                .expenseId(this.id)
+                .accountId(this.account)
+                .categoryId(this.category.getId())
+                .amount(this.amount)
+                .paymentType(this.paymentType)
+                .build());
     }
 
     private MonetaryAmount requireValidAmount(MonetaryAmount amount) {
