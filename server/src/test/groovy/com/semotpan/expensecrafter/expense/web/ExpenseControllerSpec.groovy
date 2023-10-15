@@ -2,6 +2,7 @@ package com.semotpan.expensecrafter.expense.web
 
 import com.semotpan.expensecrafter.TestServerApplication
 import com.semotpan.expensecrafter.expense.DataSamples
+import com.semotpan.expensecrafter.expense.ExpenseCreated
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.skyscreamer.jsonassert.JSONAssert
@@ -11,6 +12,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.modulith.test.ApplicationModuleTest
+import org.springframework.modulith.test.PublishedEvents
 import org.springframework.test.context.jdbc.Sql
 import spock.lang.Specification
 import spock.lang.Tag
@@ -23,10 +26,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON
 
 @Tag("integration")
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = TestServerApplication)
+@ApplicationModuleTest
 class ExpenseControllerSpec extends Specification {
 
     @Autowired
     TestRestTemplate restTemplate
+
+    @Autowired
+    PublishedEvents events
 
     @Sql('/expense/create-expense-category.sql')
     def "should create a new expense"() {
@@ -41,6 +48,9 @@ class ExpenseControllerSpec extends Specification {
 
         and: 'location header contains the created expense URL location'
         assert response.getHeaders().getLocation() != null
+
+        and: 'expense created event raised'
+        assert events.ofType(ExpenseCreated.class).size() == 1
     }
 
     def "should fail creation when request has validation failures"() {
