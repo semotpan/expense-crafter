@@ -1,11 +1,14 @@
 package com.semotpan.expensecrafter.expense
 
-import com.semotpan.expensecrafter.account.Account
+
 import com.semotpan.expensecrafter.shared.Failure
 import spock.lang.Specification
 import spock.lang.Tag
 
+import static com.semotpan.expensecrafter.account.Account.AccountIdentifier
+import static com.semotpan.expensecrafter.expense.Category.CategoryIdentifier
 import static com.semotpan.expensecrafter.expense.DataSamples.*
+import static com.semotpan.expensecrafter.expense.Expense.ExpenseIdentifier
 import static java.lang.Boolean.FALSE
 import static java.lang.Boolean.TRUE
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.asCollection
@@ -28,7 +31,7 @@ class DefaultExpenseServiceSpec extends Specification {
         def comp = { a, b -> a.name <=> b.name ?: a.account.id() <=> b.account.id() } as Comparator<? super Category>
 
         setup: 'repository mock behavior and interaction'
-        def account = new Account.AccountIdentifier(UUID.randomUUID())
+        def account = new AccountIdentifier(UUID.randomUUID())
         1 * categories.saveAll { actual ->
             intersect(asCollection(actual), newSampleDefaultCategories(account), comp).size() == DefaultCategories.values().size()
         } >> []
@@ -41,8 +44,8 @@ class DefaultExpenseServiceSpec extends Specification {
         setup: 'repository mock behavior and interaction'
         var category = newSampleCategory()
 
-        1 * categories.existsByIdAndAccount(_ as Category.CategoryIdentifier, _ as Account.AccountIdentifier) >> TRUE
-        1 * categories.getReferenceById(_ as Category.CategoryIdentifier) >> category
+        1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> TRUE
+        1 * categories.getReferenceById(_ as CategoryIdentifier) >> category
         1 * expenses.save({ Expense e ->
             e == newSampleExpense(
                     id: [id: e.getId().id()],
@@ -57,12 +60,12 @@ class DefaultExpenseServiceSpec extends Specification {
         assert either.isRight()
 
         and: 'expenseId is available'
-        assert either.get() instanceof Expense.ExpenseIdentifier
+        assert either.get() instanceof ExpenseIdentifier
     }
 
     def "should fail expense creation when category is not found"() {
         setup: 'repository mock behavior'
-        1 * categories.existsByIdAndAccount(_ as Category.CategoryIdentifier, _ as Account.AccountIdentifier) >> FALSE
+        1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> FALSE
 
         when: 'expense fails to create'
         def either = service.createExpense(newSampleExpenseCommandRequest())
@@ -180,5 +183,85 @@ class DefaultExpenseServiceSpec extends Specification {
                         .message('ExpenseDate cannot be null')
                         .build()
         ])
+    }
+
+    def "should update an expense"() {
+        setup: 'repository mock behavior and interaction'
+        1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> TRUE
+        1 * expenses.findById(_ as ExpenseIdentifier) >> Optional.of(newSampleExpense())
+        1 * categories.getReferenceById(_ as CategoryIdentifier) >> newSampleCategory(id: [id: "2298dfbc-4eb3-4d83-95f4-dd7a56d21136"])
+        1 * expenses.save(_ as Expense) >> newSampleExpense()
+
+        def command = newSampleExpenseCommandRequest([
+                categoryId : "2298dfbc-4eb3-4d83-95f4-dd7a56d21136",
+                amount     : 50,
+                paymentType: "Card",
+                expenseDate: "2023-10-15",
+                description: "Pencils buying"
+        ])
+
+        when: 'expense is updated'
+        def uuid = UUID.fromString('3b257779-a5db-4e87-9365-72c6f8d4977d')
+        def either = service.updateExpense(new ExpenseIdentifier(uuid), command)
+
+        then: 'updated expense is present'
+        assert either.isRight()
+
+        and: 'expense values match command request'
+        assert either.get() == newSampleExpense([
+                category   : newSampleCategory(id: [id: "2298dfbc-4eb3-4d83-95f4-dd7a56d21136"]),
+                amount     : AMOUNT + [amount: 50.00],
+                paymentType: "CARD",
+                expenseDate: "2023-10-15",
+                description: "Pencils buying"
+        ])
+    }
+
+    def "should fail expense update when accountId is null"() {
+        given: 'new command with null accountId'
+        def command = newSampleExpenseCommandRequest(accountId: null)
+
+        when: 'expense fails to create'
+        def either = service.updateExpense(new ExpenseIdentifier(UUID.randomUUID()), command)
+
+        then: 'validation failure result is present'
+        assert either.isLeft()
+
+        and: 'validation failure on accountId field'
+        assert either.getLeft() == Failure.ofValidation('Failures on expense update request', [
+                Failure.FieldViolation.builder()
+                        .field('accountId')
+                        .message('AccountId cannot be null')
+                        .build()
+        ])
+    }
+
+    def "should fail expense update when category or account not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> FALSE
+
+        when: 'expense fails to update'
+        def either = service.updateExpense(new ExpenseIdentifier(UUID.randomUUID()), newSampleExpenseCommandRequest())
+
+        then: 'not found failure result is present'
+        assert either.isLeft()
+
+        and: 'not found failure for provided category and account'
+        assert either.getLeft() == Failure.ofNotFound('Category or Account not found')
+    }
+
+    def "should fail expense update when expense not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> TRUE
+        1 * expenses.findById(_ as ExpenseIdentifier) >> Optional.empty()
+
+        when: 'expense fails to update'
+        def either = service.updateExpense(new ExpenseIdentifier(UUID.randomUUID(),), newSampleExpenseCommandRequest())
+
+        then: 'not found failure result is present'
+        assert either.isLeft()
+
+        and: 'not found failure for provided expenseId'
+        assert either.getLeft() == Failure.ofNotFound('Expense not found')
     }
 }

@@ -61,10 +61,11 @@ public class Expense extends AbstractAggregateRoot<Expense> {
         this.id = new ExpenseIdentifier(UUID.randomUUID());
         this.creationTimestamp = Instant.now();
         this.account = requireNonNull(account, "account cannot be null");
-        this.category = requireNonNull(category, "category cannot be null");
+
         this.amount = requireValidAmount(amount);
-        this.paymentType = paymentType == null ? PaymentType.CARD : paymentType;
-        this.expenseDate = expenseDate == null ? LocalDate.now() : expenseDate;
+        category(category);
+        paymentType(paymentType);
+        expenseDate(expenseDate);
         this.description = description;
 
         registerEvent(ExpenseCreated.builder()
@@ -74,6 +75,38 @@ public class Expense extends AbstractAggregateRoot<Expense> {
                 .amount(this.amount)
                 .paymentType(this.paymentType)
                 .build());
+    }
+
+    void update(MonetaryAmount amount,
+                PaymentType paymentType,
+                LocalDate expenseDate,
+                String description,
+                Category category) {
+        this.amount = requireValidAmount(amount);
+        this.description = description;
+        category(category);
+        paymentType(paymentType);
+        expenseDate(expenseDate);
+
+        registerEvent(ExpenseUpdated.builder()
+                .expenseId(this.id)
+                .accountId(this.account)
+                .categoryId(this.category.getId())
+                .amount(this.amount)
+                .paymentType(this.paymentType)
+                .build());
+    }
+
+    private void category(Category category) {
+        this.category = requireNonNull(category, "category cannot be null");
+    }
+
+    private void paymentType(PaymentType paymentType) {
+        this.paymentType = paymentType == null ? PaymentType.CARD : paymentType;
+    }
+
+    private void expenseDate(LocalDate expenseDate) {
+        this.expenseDate = expenseDate == null ? LocalDate.now() : expenseDate;
     }
 
     private MonetaryAmount requireValidAmount(MonetaryAmount amount) {

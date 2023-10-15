@@ -57,4 +57,34 @@ class DefaultExpenseService implements ExpenseService {
 
         return Either.right(expense.getId());
     }
+
+    @Override
+    public Either<Failure, Expense> updateExpense(ExpenseIdentifier id, ExpenseCommandRequest command) {
+        var validation = commandValidator.validate(command);
+
+        if (validation.isInvalid()) {
+            return Either.left(Failure.ofValidation("Failures on expense update request", validation.getError().toJavaList()));
+        }
+
+        if (!categories.existsByIdAndAccount(new CategoryIdentifier(command.categoryId()), new AccountIdentifier(command.accountId()))) {
+            return Either.left(Failure.ofNotFound("Category or Account not found"));
+        }
+
+        var expense = expenses.findById(id);
+        if (expense.isEmpty()) {
+            return Either.left(Failure.ofNotFound("Expense not found"));
+        }
+
+        expense.get().update(
+                Money.of(command.amount(), EURO),
+                command.paymentType() != null ? PaymentType.fromValue(command.paymentType()) : PaymentType.CARD,
+                command.expenseDate(),
+                command.description(),
+                categories.getReferenceById(new CategoryIdentifier(command.categoryId()))
+        );
+
+        expenses.save(expense.get());
+
+        return Either.right(expense.get());
+    }
 }
