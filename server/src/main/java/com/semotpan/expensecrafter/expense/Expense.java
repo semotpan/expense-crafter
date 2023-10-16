@@ -119,6 +119,17 @@ public class Expense extends AbstractAggregateRoot<Expense> {
         return amount;
     }
 
+    /**
+     * hard delete, register {@link ExpenseDeleted} event to be sent after hard deletion
+     */
+    public void markDeleted() {
+        registerEvent(ExpenseDeleted.builder()
+                .expenseId(this.id)
+                .accountId(this.account)
+                .categoryId(this.category.getId())
+                .build());
+    }
+
     @Embeddable
     public record ExpenseIdentifier(UUID id) implements Serializable {
 

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 // TODO improve the implementation using - extends @HibernateRepository<Expense>
-// TODO fix jpa#save anti pattern
+// TODO fix jpa anti patterns
 public interface Expenses extends JpaRepository<Expense, ExpenseIdentifier> {
 }

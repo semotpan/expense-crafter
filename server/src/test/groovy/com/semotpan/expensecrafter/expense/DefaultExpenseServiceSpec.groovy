@@ -256,9 +256,38 @@ class DefaultExpenseServiceSpec extends Specification {
         1 * expenses.findById(_ as ExpenseIdentifier) >> Optional.empty()
 
         when: 'expense fails to update'
-        def either = service.updateExpense(new ExpenseIdentifier(UUID.randomUUID(),), newSampleExpenseCommandRequest())
+        def either = service.updateExpense(new ExpenseIdentifier(UUID.randomUUID()), newSampleExpenseCommandRequest())
 
-        then: 'not found failure result is present'
+        then: 'failure result is present'
+        assert either.isLeft()
+
+        and: 'not found failure for provided expenseId'
+        assert either.getLeft() == Failure.ofNotFound('Expense not found')
+    }
+
+    def "should delete an expense"() {
+        setup: 'repository mock behavior and interaction'
+        def expense = newSampleExpense()
+        1 * expenses.findById(_ as ExpenseIdentifier) >> Optional.of(expense)
+
+        when: 'expense is deleted'
+        def either = service.deleteExpense(expense.getId())
+
+        then: 'no result is present'
+        assert either.isRight()
+
+        and: 'expenses repository invoked'
+        1 * expenses.delete(expense)
+    }
+
+    def "should fail delete when expense not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * expenses.findById(_ as ExpenseIdentifier) >> Optional.empty()
+
+        when: 'expense failed to delete'
+        def either = service.deleteExpense(new ExpenseIdentifier(UUID.randomUUID()))
+
+        then: 'failure result is present'
         assert either.isLeft()
 
         and: 'not found failure for provided expenseId'
