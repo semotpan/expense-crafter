@@ -21,21 +21,21 @@ import static org.apache.commons.lang3.StringUtils.length;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = PRIVATE, force = true)
-public class IncomeSource {
+public final class IncomeSource {
 
     static final int MAX_LENGTH = 100;
 
     @EmbeddedId
-    private IncomeSourceIdentifier id;
+    private final IncomeSourceIdentifier id;
 
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "account_id"))
-    private AccountIdentifier account;
+    private final AccountIdentifier account;
 
     private String name;
 
     public IncomeSource(String name, AccountIdentifier account) {
-        this.id = new IncomeSource.IncomeSourceIdentifier(UUID.randomUUID());
+        this.id = new IncomeSourceIdentifier(UUID.randomUUID());
         this.account = requireNonNull(account, "account cannot be null");
         this.name = requireValidName(name);
     }

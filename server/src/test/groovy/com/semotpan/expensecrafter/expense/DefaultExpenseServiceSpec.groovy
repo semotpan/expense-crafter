@@ -42,10 +42,8 @@ class DefaultExpenseServiceSpec extends Specification {
 
     def "should create an expense"() {
         setup: 'repository mock behavior and interaction'
-        var category = newSampleCategory()
-
         1 * categories.existsByIdAndAccount(_ as CategoryIdentifier, _ as AccountIdentifier) >> TRUE
-        1 * categories.getReferenceById(_ as CategoryIdentifier) >> category
+        1 * categories.getReferenceById(_ as CategoryIdentifier) >> newSampleCategory()
         1 * expenses.save({ Expense e ->
             e == newSampleExpense(
                     id: [id: e.getId().id()],
