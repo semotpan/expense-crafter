@@ -21,12 +21,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public interface ExpenseControllerDoc {
 
-    String PATH = "expenses";
+    String TAG = "expenses";
 
     @Operation(summary = "Add a new expense in the Expense Crafter",
             description = "Operation to add a new expense for the current logged-in account, the expense must be attached to an expense category",
             security = {@SecurityRequirement(name = "openId")},
-            tags = {PATH})
+            tags = {TAG})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful Operation", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "400", description = "Invalid Input", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
@@ -39,7 +39,7 @@ public interface ExpenseControllerDoc {
     @Operation(summary = "Full-update an expense in the Expense Crafter",
             description = "Operation to full-update an existing expense for the current logged-in account, the fields allowed to be updated: amount, paymentType, expenseDate, category, description!",
             security = {@SecurityRequirement(name = "openId")},
-            tags = {PATH})
+            tags = {TAG})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successful Operation"),
             @ApiResponse(responseCode = "400", description = "Invalid Input", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),

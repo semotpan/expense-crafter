@@ -13,4 +13,6 @@ public interface IncomeSources extends JpaRepository<IncomeSource, IncomeSourceI
 
     List<IncomeSource> findByAccount(AccountIdentifier account);
 
+    boolean existsByIdAndAccount(IncomeSourceIdentifier id, AccountIdentifier account);
+
 }
