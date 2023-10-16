@@ -1,16 +1,18 @@
 package com.semotpan.expensecrafter.expense;
 
-import com.semotpan.expensecrafter.account.Account;
+import com.semotpan.expensecrafter.expense.Category.CategoryIdentifier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.semotpan.expensecrafter.account.Account.AccountIdentifier;
+
 @Repository
-public interface Categories extends JpaRepository<Category, Category.CategoryIdentifier> {
+public interface Categories extends JpaRepository<Category, CategoryIdentifier> {
 
-    List<Category> findByAccount(Account.AccountIdentifier account);
+    List<Category> findByAccount(AccountIdentifier account);
 
-    boolean existsByIdAndAccount(Category.CategoryIdentifier id, Account.AccountIdentifier accountIdentifier);
+    boolean existsByIdAndAccount(CategoryIdentifier id, AccountIdentifier accountIdentifier);
 
 }

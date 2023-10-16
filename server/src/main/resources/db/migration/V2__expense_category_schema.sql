@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS expense_category
 )
 ;
 
-CREATE INDEX expense_categories_account_id_idx ON expense_category (account_id);
+CREATE INDEX expense_category_account_id_idx ON expense_category (account_id);
 CREATE UNIQUE INDEX unique_category_name_account_id_idx ON expense_category (account_id, name);

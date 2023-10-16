@@ -1,4 +1,4 @@
-package com.semotpan.expensecrafter.expense;
+package com.semotpan.expensecrafter.income;
 
 import com.semotpan.expensecrafter.account.Account.AccountIdentifier;
 import jakarta.persistence.*;
@@ -16,26 +16,26 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Entity
-@Table(name = "expense_category")
+@Table(name = "income_source")
 @Getter
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = PRIVATE, force = true)
-public final class Category {
+public class IncomeSource {
 
     static final int MAX_LENGTH = 100;
 
     @EmbeddedId
-    private final CategoryIdentifier id;
+    private IncomeSourceIdentifier id;
 
     @Embedded
     @AttributeOverride(name = "id", column = @Column(name = "account_id"))
-    private final AccountIdentifier account;
+    private AccountIdentifier account;
 
     private String name;
 
-    public Category(String name, AccountIdentifier account) {
-        this.id = new CategoryIdentifier(UUID.randomUUID());
+    public IncomeSource(String name, AccountIdentifier account) {
+        this.id = new IncomeSource.IncomeSourceIdentifier(UUID.randomUUID());
         this.account = requireNonNull(account, "account cannot be null");
         this.name = requireValidName(name);
     }
@@ -53,7 +53,7 @@ public final class Category {
     }
 
     @Embeddable
-    public record CategoryIdentifier(UUID id) implements Serializable {
+    public record IncomeSourceIdentifier(UUID id) implements Serializable {
 
         @Override
         public String toString() {
