@@ -3,6 +3,7 @@ package com.semotpan.expensecrafter.expense.web
 import com.semotpan.expensecrafter.TestServerApplication
 import com.semotpan.expensecrafter.expense.DataSamples
 import com.semotpan.expensecrafter.expense.ExpenseCreated
+import com.semotpan.expensecrafter.expense.ExpenseDeleted
 import com.semotpan.expensecrafter.expense.ExpenseUpdated
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -23,6 +24,7 @@ import spock.lang.Tag
 
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import static org.springframework.http.HttpMethod.DELETE
 import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.MediaType.APPLICATION_JSON
@@ -88,7 +90,7 @@ class ExpenseControllerSpec extends Specification {
         then: 'response status is no content'
         assert response.getStatusCode() == NO_CONTENT
 
-        and: 'expense created event raised'
+        and: 'expense updated event raised'
         assert events.ofType(ExpenseUpdated.class).size() == 1
     }
 
@@ -106,6 +108,35 @@ class ExpenseControllerSpec extends Specification {
         JSONAssert.assertEquals(expectedUpdateFailure(), response.getBody(), LENIENT)
     }
 
+    @Sql(['/expense/create-expense-category.sql', '/expense/create-expense.sql'])
+    def "should delete an expense"() {
+        given: 'user wants to delete an expense'
+        var expenseId = UUID.fromString('3b257779-a5db-4e87-9365-72c6f8d4977d')
+
+        when: 'expense is deleted'
+        var response = deleteAnExpense(expenseId)
+
+        then: 'response status is no content'
+        assert response.getStatusCode() == NO_CONTENT
+
+        and: 'expense deleted event raised'
+        assert events.ofType(ExpenseDeleted.class).size() == 1
+    }
+
+    def "should fail delete when expense not found"() {
+        given: 'user wants to delete an expense'
+        var expenseId = UUID.randomUUID()
+
+        when: 'expense fails to delete'
+        var response = deleteAnExpense(expenseId)
+
+        then: 'response has status code not found'
+        assert response.getStatusCode() == NOT_FOUND
+
+        and: 'response body contains not found failure response'
+        JSONAssert.assertEquals(expectedDeleteFailure(), response.getBody(), LENIENT)
+    }
+
     def postNewExpense(String req) {
         restTemplate.postForEntity('/expenses', entityRequest(req), String.class)
     }
@@ -115,6 +146,15 @@ class ExpenseControllerSpec extends Specification {
                 '/expenses/3b257779-a5db-4e87-9365-72c6f8d4977d',
                 PUT,
                 entityRequest(req),
+                String.class
+        )
+    }
+
+    def deleteAnExpense(UUID expenseId) {
+        restTemplate.exchange(
+                "/expenses/${expenseId}",
+                DELETE,
+                entityRequest(null),
                 String.class
         )
     }
@@ -157,6 +197,14 @@ class ExpenseControllerSpec extends Specification {
                 status   : 404,
                 errorCode: "NOT_FOUND",
                 message  : "Category or Account not found"
+        ])
+    }
+
+    def expectedDeleteFailure() {
+        JsonOutput.toJson([
+                status   : 404,
+                errorCode: "NOT_FOUND",
+                message  : "Expense not found"
         ])
     }
 }

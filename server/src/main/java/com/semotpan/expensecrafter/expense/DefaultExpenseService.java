@@ -87,4 +87,17 @@ class DefaultExpenseService implements ExpenseService {
 
         return Either.right(expense.get());
     }
+
+    @Override
+    public Either<Failure, Void> deleteExpense(ExpenseIdentifier id) {
+        var expense = expenses.findById(id);
+        if (expense.isEmpty()) {
+            return Either.left(Failure.ofNotFound("Expense not found"));
+        }
+
+        expense.get().markDeleted();
+
+        expenses.delete(expense.get());
+        return Either.right(null);
+    }
 }

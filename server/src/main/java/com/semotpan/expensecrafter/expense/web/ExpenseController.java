@@ -34,4 +34,10 @@ final class ExpenseController implements ExpenseControllerDoc {
         return expenseService.updateExpense(new ExpenseIdentifier(id), request)
                 .fold(apiFailureHandler::handle, expense -> noContent().build());
     }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
+        return expenseService.deleteExpense(new ExpenseIdentifier(id))
+                .fold(apiFailureHandler::handle, ok -> noContent().build());
+    }
 }
