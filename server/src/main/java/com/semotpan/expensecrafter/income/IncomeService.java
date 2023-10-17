@@ -22,4 +22,12 @@ public interface IncomeService {
      * @return - Either.Left - Failure (validation schema, or not found), Either.Right - Updated income
      */
     Either<Failure, Income> updateIncome(IncomeIdentifier id, IncomeCommand command);
+
+    /**
+     * Delete an {@link Income} by ID and {@link IncomeDeleted} event is raised
+     *
+     * @param id - income id to be deleted
+     * @return - Either.Left - Failure (not found), Either.Right - no data (successfully deleted)
+     */
+    Either<Failure, Void> deleteIncome(IncomeIdentifier id);
 }
