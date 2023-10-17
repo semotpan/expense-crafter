@@ -10,6 +10,8 @@ import static com.semotpan.expensecrafter.income.Income.IncomeIdentifier
 import static com.semotpan.expensecrafter.income.IncomeSource.IncomeSourceIdentifier
 import static java.lang.Boolean.FALSE
 import static java.lang.Boolean.TRUE
+import static java.util.UUID.fromString
+import static java.util.UUID.randomUUID
 
 @Tag("unit")
 class DefaultIncomeServiceSpec extends Specification {
@@ -167,4 +169,84 @@ class DefaultIncomeServiceSpec extends Specification {
         assert either.getLeft() == Failure.ofNotFound('Income Source or Account not found')
     }
 
+    def "should fail income update when accountId is null"() {
+        given: 'new command with null accountId'
+        def command = newSampleIncomeCommand(accountId: null)
+
+        when: 'income fails to update'
+        def either = service.updateIncome(new IncomeIdentifier(randomUUID()), command)
+
+        then: 'failure result is present'
+        assert either.isLeft()
+
+        and: 'validation failure on accountId field'
+        assert either.getLeft() == Failure.ofValidation('Failures on income update request', [
+                Failure.FieldViolation.builder()
+                        .field('accountId')
+                        .message('AccountId cannot be null')
+                        .build()
+        ])
+    }
+
+    def "should fail income update when income source or account not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * incomeSources.existsByIdAndAccount(_ as IncomeSourceIdentifier, _ as AccountIdentifier) >> FALSE
+
+        when: 'income fails to update'
+        def either = service.updateIncome(new IncomeIdentifier(randomUUID()), newSampleIncomeCommand())
+
+        then: 'not found failure result is present'
+        assert either.isLeft()
+
+        and: 'not found failure for provided income source and account'
+        assert either.getLeft() == Failure.ofNotFound('Income Source or Account not found')
+    }
+
+    def "should fail income update when income not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * incomeSources.existsByIdAndAccount(_ as IncomeSourceIdentifier, _ as AccountIdentifier) >> TRUE
+        1 * incomes.findById(_ as IncomeIdentifier) >> Optional.empty()
+
+        when: 'income fails to update'
+        def either = service.updateIncome(new IncomeIdentifier(randomUUID()), newSampleIncomeCommand())
+
+        then: 'not found failure result is present'
+        assert either.isLeft()
+
+        and: 'not found failure for provided income'
+        assert either.getLeft() == Failure.ofNotFound('Income not found')
+    }
+
+    def "should update an income"() {
+        setup: 'repository mock behavior and interaction'
+        def incomeSourceId = fromString("2298dfbc-4eb3-4d83-95f4-dd7a56d21136")
+        1 * incomeSources.existsByIdAndAccount(_ as IncomeSourceIdentifier, _ as AccountIdentifier) >> TRUE
+        1 * incomes.findById(_ as IncomeIdentifier) >> Optional.of(newSampleIncome())
+        1 * incomeSources.getReferenceById(_ as IncomeSourceIdentifier) >> newSampleIncomeSource(id: [id: incomeSourceId.toString()])
+        1 * incomes.save(_ as Income) >> newSampleIncome()
+
+        def command = newSampleIncomeCommand([
+                incomeSourceId: incomeSourceId.toString(),
+                amount        : 55,
+                paymentType   : "Card",
+                incomeDate    : "2023-10-17",
+                description   : "Profit"
+        ])
+
+        when: 'income is updated'
+        def uuid = fromString('3b257779-a5db-4e87-9365-72c6f8d4977d')
+        def either = service.updateIncome(new IncomeIdentifier(uuid), command)
+
+        then: 'updated income is present'
+        assert either.isRight()
+
+        and: 'income values match command request'
+        assert either.get() == newSampleIncome([
+                incomeSource: newSampleIncomeSource(id: [id: incomeSourceId.toString()]),
+                amount      : AMOUNT + [amount: 55.00],
+                paymentType : "CARD",
+                incomeDate  : "2023-10-17",
+                description : "Profit"
+        ])
+    }
 }

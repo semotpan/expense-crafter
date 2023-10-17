@@ -44,10 +44,22 @@ public interface ExpenseControllerDoc {
             @ApiResponse(responseCode = "204", description = "Successful Operation"),
             @ApiResponse(responseCode = "400", description = "Invalid Input", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Not found Failure", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "Duplication Failure", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "422", description = "Validation Failure", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     ResponseEntity<?> update(@Parameter(in = ParameterIn.PATH, description = "ExpenseId to be updated", required = true) UUID expenseId,
                              @RequestBody(description = "Expense Resource to be updated", required = true) ExpenseCommandRequest request);
+
+    @Operation(summary = "Delete an expense in the Expense Crafter",
+            description = "Operation to delete an existing expense for the current logged-in account.",
+            security = {@SecurityRequirement(name = "openId")},
+            tags = {TAG})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successful Operation"),
+            @ApiResponse(responseCode = "400", description = "Invalid Input", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found Failure", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    ResponseEntity<?> delete(@Parameter(in = ParameterIn.PATH, description = "ExpenseId to be deleted", required = true) UUID id);
+
 }

@@ -85,6 +85,26 @@ public class Income extends AbstractAggregateRoot<Income> {
         return amount;
     }
 
+    public void update(MonetaryAmount amount,
+                       PaymentType paymentType,
+                       LocalDate incomeDate,
+                       String description,
+                       IncomeSource incomeSource) {
+        this.amount = requireValidAmount(amount);
+        this.paymentType = paymentType == null ? PaymentType.CARD : paymentType;
+        this.incomeDate = incomeDate == null ? LocalDate.now() : incomeDate;
+        this.description = description;
+        this.incomeSource = requireNonNull(incomeSource, "incomeSource cannot be null");
+
+        registerEvent(IncomeUpdated.builder()
+                .incomeId(this.id)
+                .accountId(this.account)
+                .incomeSourceId(this.incomeSource.getId())
+                .amount(this.amount)
+                .paymentType(this.paymentType)
+                .build());
+    }
+
     @Embeddable
     public record IncomeIdentifier(UUID id) implements Serializable {
 

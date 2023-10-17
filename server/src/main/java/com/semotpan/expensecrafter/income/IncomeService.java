@@ -14,4 +14,12 @@ public interface IncomeService {
      */
     Either<Failure, IncomeIdentifier> createIncome(IncomeCommand command);
 
+    /**
+     * Full update of an existing  {@link Income} and {@link IncomeUpdated} event is raised
+     *
+     * @param id      - income id to be updated
+     * @param command - fields commands to be updated
+     * @return - Either.Left - Failure (validation schema, or not found), Either.Right - Updated income
+     */
+    Either<Failure, Income> updateIncome(IncomeIdentifier id, IncomeCommand command);
 }

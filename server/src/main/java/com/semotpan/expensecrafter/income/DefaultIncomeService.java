@@ -48,4 +48,34 @@ class DefaultIncomeService implements IncomeService {
 
         return Either.right(income.getId());
     }
+
+    @Override
+    public Either<Failure, Income> updateIncome(IncomeIdentifier id, IncomeCommand command) {
+        var validation = validator.validate(command);
+
+        if (validation.isInvalid()) {
+            return Either.left(Failure.ofValidation("Failures on income update request", validation.getError().toJavaList()));
+        }
+
+        if (!incomeSources.existsByIdAndAccount(new IncomeSourceIdentifier(command.incomeSourceId()), new AccountIdentifier(command.accountId()))) {
+            return Either.left(Failure.ofNotFound("Income Source or Account not found"));
+        }
+
+        var income = incomes.findById(id);
+        if (income.isEmpty()) {
+            return Either.left(Failure.ofNotFound("Income not found"));
+        }
+
+        income.get().update(
+                Money.of(command.amount(), EURO),
+                command.paymentType() != null ? PaymentType.fromValue(command.paymentType()) : PaymentType.CARD,
+                command.incomeDate(),
+                command.description(),
+                incomeSources.getReferenceById(new IncomeSourceIdentifier(command.incomeSourceId()))
+        );
+
+        incomes.save(income.get());
+
+        return Either.right(income.get());
+    }
 }
