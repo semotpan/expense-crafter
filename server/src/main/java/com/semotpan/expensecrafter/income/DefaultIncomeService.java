@@ -78,4 +78,17 @@ class DefaultIncomeService implements IncomeService {
 
         return Either.right(income.get());
     }
+
+    @Override
+    public Either<Failure, Void> deleteIncome(IncomeIdentifier id) {
+        var income = incomes.findById(id);
+        if (income.isEmpty()) {
+            return Either.left(Failure.ofNotFound("Income not found"));
+        }
+
+        income.get().markDeleted();
+        incomes.delete(income.get());
+
+        return Either.right(null);
+    }
 }

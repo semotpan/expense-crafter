@@ -249,4 +249,34 @@ class DefaultIncomeServiceSpec extends Specification {
                 description : "Profit"
         ])
     }
+
+    def "should fail delete when income is not found"() {
+        setup: 'repository mock behavior and interaction'
+        1 * incomes.findById(_ as IncomeIdentifier) >> Optional.empty()
+
+        when: 'income fail to delete'
+        def either = service.deleteIncome(new IncomeIdentifier(randomUUID()))
+
+        then: 'failure is present'
+        assert either.isLeft()
+
+        and: 'not found failure provided incomeId'
+        assert either.getLeft() == Failure.ofNotFound("Income not found")
+    }
+
+    def "should delete an income"() {
+        setup: 'repository mock behavior and interaction'
+
+        def income = newSampleIncome()
+        1 * incomes.findById(_ as IncomeIdentifier) >> Optional.of(income)
+
+        when: 'income is deleted'
+        def either = service.deleteIncome(income.getId())
+
+        then: 'no result present'
+        assert either.isRight()
+
+        and: 'incomes repository invoked'
+        1 * incomes.delete(income)
+    }
 }

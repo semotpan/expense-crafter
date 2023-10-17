@@ -3,6 +3,7 @@ package com.semotpan.expensecrafter.income.web
 import com.semotpan.expensecrafter.TestServerApplication
 import com.semotpan.expensecrafter.income.DataSamples
 import com.semotpan.expensecrafter.income.IncomeCreated
+import com.semotpan.expensecrafter.income.IncomeDeleted
 import com.semotpan.expensecrafter.income.IncomeUpdated
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -23,6 +24,7 @@ import spock.lang.Tag
 
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import static org.springframework.http.HttpMethod.DELETE
 import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.MediaType.APPLICATION_JSON
@@ -106,6 +108,35 @@ class IncomeControllerSpec extends Specification {
         JSONAssert.assertEquals(expectedUpdateFailure(), response.getBody(), LENIENT)
     }
 
+    @Sql(['/income/create-income-source.sql', '/income/create-income.sql'])
+    def "should delete an income"() {
+        given: 'user wants to delete an income'
+        var incomeId = UUID.fromString('3b257779-a5db-4e87-9365-72c6f8d4977d')
+
+        when: 'income is updated'
+        var response = deleteAnIncome(incomeId)
+
+        then: 'response status is no content'
+        assert response.getStatusCode() == NO_CONTENT
+
+        and: 'income deleted event raised'
+        assert events.ofType(IncomeDeleted.class).size() == 1
+    }
+
+    def "should fail delete an income when not found"() {
+        given: 'user wants to delete an income'
+        var incomeId = UUID.randomUUID()
+
+        when: 'income fails to update'
+        var response = deleteAnIncome(incomeId)
+
+        then: 'response status is not found'
+        assert response.getStatusCode() == NOT_FOUND
+
+        and: 'response body contains not found failure response'
+        JSONAssert.assertEquals(expectedDeleteFailure(), response.getBody(), LENIENT)
+    }
+
     def putAnIncome(String req) {
         restTemplate.exchange(
                 '/incomes/3b257779-a5db-4e87-9365-72c6f8d4977d',
@@ -117,6 +148,15 @@ class IncomeControllerSpec extends Specification {
 
     def postNewIncome(String req) {
         restTemplate.postForEntity('/incomes', entityRequest(req), String.class)
+    }
+
+    def deleteAnIncome(UUID incomeId) {
+        restTemplate.exchange(
+                "/incomes/${incomeId}",
+                DELETE,
+                entityRequest(null),
+                String.class
+        )
     }
 
     def entityRequest(String req) {
@@ -156,6 +196,14 @@ class IncomeControllerSpec extends Specification {
                 status   : 404,
                 errorCode: "NOT_FOUND",
                 message  : "Income Source or Account not found"
+        ])
+    }
+
+    def expectedDeleteFailure() {
+        JsonOutput.toJson([
+                status   : 404,
+                errorCode: "NOT_FOUND",
+                message  : "Income not found"
         ])
     }
 }

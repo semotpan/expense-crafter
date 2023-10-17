@@ -35,4 +35,11 @@ final class IncomeController implements IncomeControllerDoc {
                 .fold(apiFailureHandler::handle, income -> noContent().build());
 
     }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<?> delete(@PathVariable UUID id) {
+        return incomeService.deleteIncome(new Income.IncomeIdentifier(id))
+                .fold(apiFailureHandler::handle, income -> noContent().build());
+
+    }
 }

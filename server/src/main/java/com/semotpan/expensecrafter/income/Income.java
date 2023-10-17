@@ -105,6 +105,13 @@ public class Income extends AbstractAggregateRoot<Income> {
                 .build());
     }
 
+    /**
+     * hard delete, register {@link IncomeDeleted} event to be sent after hard deletion
+     */
+    public void markDeleted() {
+        registerEvent(new IncomeDeleted(this.id, this.account, this.incomeSource.getId()));
+    }
+
     @Embeddable
     public record IncomeIdentifier(UUID id) implements Serializable {
 

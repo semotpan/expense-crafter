@@ -50,4 +50,16 @@ public interface IncomeControllerDoc {
     ResponseEntity<?> update(@Parameter(in = ParameterIn.PATH, description = "IncomeId to be updated", required = true) UUID incomeId,
                              @RequestBody(description = "Income Resource to be updated", required = true) IncomeCommand command);
 
+    @Operation(summary = "Delete an income in the Expense Crafter",
+            description = "Operation to delete an existing income for the current logged-in account.",
+            security = {@SecurityRequirement(name = "openId")},
+            tags = {TAG})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successful Operation"),
+            @ApiResponse(responseCode = "400", description = "Invalid Input", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found Failure", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    ResponseEntity<?> delete(@Parameter(in = ParameterIn.PATH, description = "IncomeId to be deleted", required = true) UUID id);
+
 }
