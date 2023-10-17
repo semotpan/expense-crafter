@@ -101,7 +101,7 @@ class ExpenseControllerSpec extends Specification {
         when: 'expense fails to update'
         var response = putAnExpense(request)
 
-        then: 'response has status code unprocessable entity'
+        then: 'response has status code not found'
         assert response.getStatusCode() == NOT_FOUND
 
         and: 'response body contains not found failure response'
@@ -177,12 +177,11 @@ class ExpenseControllerSpec extends Specification {
 
     def newValidUpdateRequest() {
         JsonOutput.toJson(DataSamples.EXPENSE_COMMAND_REQUEST + [
-                categoryId  : 'e2709aa2-7907-4f78-98b6-0f36a0c1b5ca',
-                paymentType : "Card",
-                amount      : 50,
-                currencyCode: "MDL",
-                expenseDate : '2023-10-15',
-                description : 'Pencils buying'
+                categoryId : 'e2709aa2-7907-4f78-98b6-0f36a0c1b5ca',
+                paymentType: "Card",
+                amount     : 50,
+                expenseDate: '2023-10-15',
+                description: 'Pencils buying'
         ])
     }
 

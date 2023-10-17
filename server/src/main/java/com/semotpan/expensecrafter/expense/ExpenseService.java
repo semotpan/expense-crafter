@@ -15,7 +15,7 @@ public interface ExpenseService {
     void initDefaultCategories(AccountIdentifier accountIdentifier);
 
     /**
-     * Create a new {@link Expense} and {@link ExpenseCreated} is raised
+     * Create a new {@link Expense} and {@link ExpenseCreated} event is raised
      *
      * @param command - the request values to build an expense,
      * @return - Either.Left - Failure (validation schema, or not found), Either.Right - created expense id
@@ -23,7 +23,7 @@ public interface ExpenseService {
     Either<Failure, ExpenseIdentifier> createExpense(ExpenseCommandRequest command);
 
     /**
-     * Full update of an existing  {@link Expense} and {@link ExpenseUpdated} is raised
+     * Full update of an existing  {@link Expense} and {@link ExpenseUpdated} event is raised
      *
      * @param id      - expense id to be updated
      * @param command - fields commands to be updated
@@ -32,7 +32,7 @@ public interface ExpenseService {
     Either<Failure, Expense> updateExpense(ExpenseIdentifier id, ExpenseCommandRequest command);
 
     /**
-     * Delete an {@link Expense} by ID and {@link ExpenseDeleted} is raised
+     * Delete an {@link Expense} by ID and {@link ExpenseDeleted} event is raised
      *
      * @param id - expense Id to be deleted
      * @return - Either.Left - Failure (not found), Either.Right - no data (successfully deleted)

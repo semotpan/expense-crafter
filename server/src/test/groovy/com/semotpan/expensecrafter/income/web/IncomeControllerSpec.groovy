@@ -3,6 +3,7 @@ package com.semotpan.expensecrafter.income.web
 import com.semotpan.expensecrafter.TestServerApplication
 import com.semotpan.expensecrafter.income.DataSamples
 import com.semotpan.expensecrafter.income.IncomeCreated
+import com.semotpan.expensecrafter.income.IncomeUpdated
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.skyscreamer.jsonassert.JSONAssert
@@ -22,8 +23,8 @@ import spock.lang.Tag
 
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import static org.springframework.http.HttpStatus.CREATED
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
+import static org.springframework.http.HttpMethod.PUT
+import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.MediaType.APPLICATION_JSON
 
 @Tag("integration")
@@ -76,6 +77,44 @@ class IncomeControllerSpec extends Specification {
         JSONAssert.assertEquals(expectedCreationFailure(), response.getBody(), LENIENT)
     }
 
+    @Sql(['/income/create-income-source.sql', '/income/create-income.sql'])
+    def "should update an income"() {
+        given: 'user wants to update an income'
+        var request = newValidUpdateRequest()
+
+        when: 'income is updated'
+        var response = putAnIncome(request)
+
+        then: 'response status is no content'
+        assert response.getStatusCode() == NO_CONTENT
+
+        and: 'income updated event raised'
+        assert events.ofType(IncomeUpdated.class).size() == 1
+    }
+
+    def "should fail update when income source or account not found"() {
+        given: 'user wants to update an income'
+        var request = newValidUpdateRequest()
+
+        when: 'expense fails to update'
+        var response = putAnIncome(request)
+
+        then: 'response has status code not found'
+        assert response.getStatusCode() == NOT_FOUND
+
+        and: 'response body contains not found failure response'
+        JSONAssert.assertEquals(expectedUpdateFailure(), response.getBody(), LENIENT)
+    }
+
+    def putAnIncome(String req) {
+        restTemplate.exchange(
+                '/incomes/3b257779-a5db-4e87-9365-72c6f8d4977d',
+                PUT,
+                entityRequest(req),
+                String.class
+        )
+    }
+
     def postNewIncome(String req) {
         restTemplate.postForEntity('/incomes', entityRequest(req), String.class)
     }
@@ -96,9 +135,27 @@ class IncomeControllerSpec extends Specification {
         ])
     }
 
+    def newValidUpdateRequest() {
+        JsonOutput.toJson(DataSamples.INCOME_COMMAND + [
+                incomeSourceId: 'e2709aa2-7907-4f78-98b6-0f36a0c1b5ca',
+                paymentType   : "Card",
+                amount        : 50,
+                expenseDate   : '2023-10-17',
+                description   : 'Profit'
+        ])
+    }
+
     def expectedCreationFailure() {
         def filePath = 'income/income-creation-failure-response.json'
         def failureAsMap = new JsonSlurper().parse(new ClassPathResource(filePath).getFile())
         JsonOutput.toJson(failureAsMap)
+    }
+
+    def expectedUpdateFailure() {
+        JsonOutput.toJson([
+                status   : 404,
+                errorCode: "NOT_FOUND",
+                message  : "Income Source or Account not found"
+        ])
     }
 }
