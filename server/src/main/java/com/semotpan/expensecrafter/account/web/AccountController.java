@@ -19,7 +19,7 @@ final class AccountController implements AccountControllerDoc {
 
     private final Accounts accounts;
 
-    @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@RequestBody Account req) {
         var account = accounts.save(req);
 

@@ -13,7 +13,8 @@
     },
     {
       "field": "paymentType",
-      "message": "PaymentType must be 'Cash' or 'Card'"
+      "message": "PaymentType must be 'Cash' or 'Card'",
+      "rejectedValue": "Other"
     },
     {
       "field": "amount",

@@ -16,6 +16,10 @@ public interface Failure {
         return new NotFoundFailure(message);
     }
 
+    static Failure ofConflict(String message) {
+        return new ConflictFailure(message);
+    }
+
     record ValidationFailure(String message, Collection<FieldViolation> fieldViolations) implements Failure {
         public ValidationFailure {
             requireNonNull(fieldViolations, "fieldViolations cannot be null");
@@ -23,6 +27,8 @@ public interface Failure {
     }
 
     record NotFoundFailure(String message) implements Failure {}
+
+    record ConflictFailure(String message) implements Failure {}
 
     @Builder
     record FieldViolation(String field, String message, Object rejectedValue) {}
