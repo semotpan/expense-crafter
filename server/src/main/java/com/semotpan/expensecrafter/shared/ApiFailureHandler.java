@@ -8,14 +8,14 @@ import org.springframework.http.ResponseEntity;
 import java.util.Collection;
 import java.util.List;
 
-import static com.semotpan.expensecrafter.shared.ApiErrorResponse.notFound;
-import static com.semotpan.expensecrafter.shared.ApiErrorResponse.unprocessableEntity;
+import static com.semotpan.expensecrafter.shared.ApiErrorResponse.*;
 
 public final class ApiFailureHandler {
 
     public ResponseEntity<?> handle(Failure failure) {
         return switch (failure) {
             case NotFoundFailure(var message) -> notFound(message);
+            case Failure.ConflictFailure(var message) -> conflict(message);
             case ValidationFailure(var msg, var fieldViolations) -> unprocessableEntity(map(fieldViolations), msg);
             default -> throw new IllegalArgumentException("No handler found!");
         };

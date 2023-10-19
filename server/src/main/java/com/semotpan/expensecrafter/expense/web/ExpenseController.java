@@ -23,19 +23,19 @@ final class ExpenseController implements ExpenseControllerDoc {
     private final ExpenseService expenseService;
     private final ApiFailureHandler apiFailureHandler;
 
-    @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> create(@RequestBody ExpenseCommandRequest request) {
         return expenseService.createExpense(request)
                 .fold(apiFailureHandler::handle, id -> created(fromCurrentRequest().path("/{id}").build(id)).build());
     }
 
-    @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable UUID id, @RequestBody ExpenseCommandRequest request) {
         return expenseService.updateExpense(new ExpenseIdentifier(id), request)
                 .fold(apiFailureHandler::handle, expense -> noContent().build());
     }
 
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(path = "/{id}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> delete(@PathVariable UUID id) {
         return expenseService.deleteExpense(new ExpenseIdentifier(id))
                 .fold(apiFailureHandler::handle, ok -> noContent().build());

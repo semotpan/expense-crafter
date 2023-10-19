@@ -110,7 +110,7 @@ public class Expense extends AbstractAggregateRoot<Expense> {
     }
 
     private MonetaryAmount requireValidAmount(MonetaryAmount amount) {
-        requireNonNull(amount, "account cannot be null");
+        requireNonNull(amount, "amount cannot be null");
 
         if (amount.isLessThanOrEqualTo(Money.of(BigDecimal.ZERO, amount.getCurrency()))) {
             throw new IllegalArgumentException("amount must be positive value");
