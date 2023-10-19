@@ -22,6 +22,7 @@
         <jackson-datatype-money>1.3.0</jackson-datatype-money>
         <vavr.version>0.10.4</vavr.version>
         <hypersistence-utils.version>3.6.0</hypersistence-utils.version>
+        <surefire.and.failsafe.report.dir>target/failsafe-reports</surefire.and.failsafe.report.dir>
     </properties>
     <dependencies>
         <!-- Web -->
