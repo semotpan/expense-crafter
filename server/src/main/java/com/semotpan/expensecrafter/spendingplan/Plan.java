@@ -13,6 +13,8 @@ import javax.money.MonetaryAmount;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
@@ -45,6 +47,9 @@ public class Plan extends AbstractAggregateRoot<Plan> {
     private String name;
     private String description;
 
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
+    private final List<Jar> jars = new ArrayList<>();
+
     @Builder
     public Plan(AccountIdentifier account,
                 MonetaryAmount amount,
@@ -76,6 +81,10 @@ public class Plan extends AbstractAggregateRoot<Plan> {
             throw new IllegalArgumentException("name length cannot be more than " + MAX_NAME_LENGTH);
 
         return name.trim();
+    }
+
+    public void addJars(List<Jar> jars) {
+        this.jars.addAll(requireNonNull(jars, "jars cannot be null"));
     }
 
     @Embeddable

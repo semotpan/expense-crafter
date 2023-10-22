@@ -75,12 +75,13 @@ class PlanControllerSpec extends Specification {
     }
 
     def newValidCreateRequest() {
-        JsonOutput.toJson(DataSamples.PLAN_CREATE_COMMAND)
+        JsonOutput.toJson(DataSamples.PLAN_CREATE_COMMAND + [jars: [DataSamples.JAR_CREATE_COMMAND]])
     }
 
     def newInvalidRequest() {
         JsonOutput.toJson([
-                amount     : -10
+                amount: -10,
+                jars  : [DataSamples.JAR_CREATE_COMMAND + [name: null]]
         ])
     }
 

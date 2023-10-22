@@ -14,15 +14,15 @@ import static com.semotpan.expensecrafter.shared.Currencies.EURO;
 @Service
 @Transactional
 @RequiredArgsConstructor
-class DefaultPlanService implements PlanService {
+class PlanServiceImpl implements PlanService {
 
-    private final PlanCreateCommandValidator validator = new PlanCreateCommandValidator();
+    private final PlanCreateCommandValidator planValidator = new PlanCreateCommandValidator();
 
     private final Plans plans;
 
     @Override
     public Either<Failure, PlanIdentifier> createPlan(PlanCreateCommand command) {
-        var validation = validator.validate(command);
+        var validation = planValidator.validate(command);
         if (validation.isInvalid()) {
             return Either.left(Failure.ofValidation("Failures on spending plan create request", validation.getError().toJavaList()));
         }
@@ -37,6 +37,17 @@ class DefaultPlanService implements PlanService {
                 .amount(Money.of(command.amount(), EURO))
                 .description(command.description())
                 .build();
+
+        var jars = command.jars().stream()
+                .map(cmd -> Jar.builder()
+                        .name(cmd.name())
+                        .percentage(cmd.percentage())
+                        .description(cmd.description())
+                        .plan(plan)
+                        .build())
+                .toList();
+
+        plan.addJars(jars);
 
         plans.save(plan);
 
