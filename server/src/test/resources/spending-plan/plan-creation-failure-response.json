@@ -15,6 +15,10 @@
       "field": "amount",
       "message": "Amount must be positive value",
       "rejectedValue": -10
+    },
+    {
+      "field": "jars",
+      "message": "Jars '1' has validation failures: 'Name cannot be empty'"
     }
   ]
 }
