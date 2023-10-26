@@ -3,6 +3,7 @@ package com.semotpan.expensecrafter.spendingplan;
 import com.semotpan.expensecrafter.shared.Failure;
 import com.semotpan.expensecrafter.spendingplan.Plan.PlanIdentifier;
 import io.vavr.control.Either;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +20,7 @@ public interface PlanService {
 
     Either<Failure, PlanIdentifier> createPlan(PlanCreateCommand command);
 
+    @Builder
     record PlanCreateCommand(UUID accountId,
                              BigDecimal amount,
                              String name,
