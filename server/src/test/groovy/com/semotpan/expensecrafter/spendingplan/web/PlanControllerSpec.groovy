@@ -12,14 +12,14 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.jdbc.JdbcTestUtils
 import spock.lang.Specification
 import spock.lang.Tag
 
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import static org.springframework.http.HttpStatus.CREATED
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
+import static org.springframework.http.HttpStatus.*
 import static org.springframework.http.MediaType.APPLICATION_JSON
 
 @Tag("integration")
@@ -33,7 +33,7 @@ class PlanControllerSpec extends Specification {
     JdbcTemplate jdbcTemplate
 
     def cleanup() {
-        JdbcTestUtils.deleteFromTables(jdbcTemplate, 'spending_plan')
+        JdbcTestUtils.deleteFromTables(jdbcTemplate, 'spending_plan', 'spending_jar')
     }
 
     def "should create a spending plan"() {
@@ -64,8 +64,43 @@ class PlanControllerSpec extends Specification {
         JSONAssert.assertEquals(expectedCreationFailure(), res.getBody(), LENIENT)
     }
 
-    def postNewPlan(String req) {
-        restTemplate.postForEntity('/spending-plans', entityRequest(req), String.class)
+    def "should create a default spending plan"() {
+        given: 'user wants to create a default spending plan'
+        var req = JsonOutput.toJson([
+                accountId: "e2709aa2-7907-4f78-98b6-0f36a0c1b5ca",
+                amount   : 1000
+        ])
+
+        when: 'spending plan is created'
+        var res = postNewPlan('/spending-plans/default', req)
+
+        then: 'response status is created'
+        assert res.getStatusCode() == CREATED
+
+        and: 'location header contains the created spending plan URL location'
+        assert res.getHeaders().getLocation() != null
+    }
+
+    @Sql('/spending-plan/create-spending-plan.sql')
+    def "should fail default plan creation when plan name duplicate"() {
+        given: 'user wants to create a new spending plan'
+        var req = JsonOutput.toJson([
+                accountId: "e2709aa2-7907-4f78-98b6-0f36a0c1b5ca",
+                amount   : 1000
+        ])
+
+        when: 'spending plan fails to create'
+        var res = postNewPlan('/spending-plans/default', req)
+
+        then: 'response has status code conflict'
+        assert res.getStatusCode() == CONFLICT
+
+        and: 'response body contains conflict failure response'
+        JSONAssert.assertEquals(expectedConflictCreationFailure(), res.getBody(), LENIENT)
+    }
+
+    def postNewPlan(path = '/spending-plans', String req) {
+        restTemplate.postForEntity("$path", entityRequest(req), String.class)
     }
 
     def entityRequest(String req) {
@@ -89,5 +124,13 @@ class PlanControllerSpec extends Specification {
         def filePath = 'spending-plan/plan-creation-failure-response.json'
         def failureAsMap = new JsonSlurper().parse(new ClassPathResource(filePath).getFile())
         JsonOutput.toJson(failureAsMap)
+    }
+
+    def expectedConflictCreationFailure() {
+        JsonOutput.toJson([
+                status   : 409,
+                errorCode: "CONFLICT",
+                message  : "Spending plan name already exists"
+        ])
     }
 }
